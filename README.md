@@ -11,6 +11,13 @@ Version 1 uses Jira as the source of truth and keeps all data in an in-memory Fa
 - Source: Jira REST API
 - Storage: In-memory cache only
 
+## Clone And Open Project
+
+```powershell
+git clone https://github.com/rohitsingh-zebra/WAPM-Ticket-Monitoring-Tool.git
+cd "WAPM-Ticket-Monitoring-Tool"
+```
+
 ## Quick Start
 
 1. Configure backend environment:

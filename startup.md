@@ -13,8 +13,8 @@ Use this guide to run the WAPM Ticket Monitoring Dashboard after cloning the rep
 ## 1. Clone And Open Project
 
 ```powershell
-git clone <repo-url>
-cd "WAPM Ticket Monitoring Tool"
+git clone https://github.com/rohitsingh-zebra/WAPM-Ticket-Monitoring-Tool.git
+cd "WAPM-Ticket-Monitoring-Tool"
 ```
 
 ## 2. Backend Setup
