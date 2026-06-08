@@ -1,0 +1,66 @@
+{
+  "issues": [
+    {
+      "id": "10001",
+      "key": "WAPM-1001",
+      "fields": {
+        "summary": "Cognos Studio report failed for AZ",
+        "description": "Missing employee report detected by monitoring script.",
+        "status": {
+          "name": "Open"
+        },
+        "assignee": {
+          "displayName": "John Doe"
+        },
+        "created": "2026-06-01T10:00:00.000+0000",
+        "updated": "2026-06-01T12:00:00.000+0000",
+        "resolutiondate": null,
+        "labels": ["wapm", "cognos"],
+        "components": [
+          {
+            "name": "Reporting"
+          }
+        ],
+        "customfield_20014": {
+          "value": "CL17"
+        },
+        "customfield_20034": {
+          "value": "AZ"
+        },
+        "customfield_20032": {
+          "value": "PRD"
+        }
+      }
+    },
+    {
+      "id": "10002",
+      "key": "WAPM-1002",
+      "fields": {
+        "summary": "Timesheet validation warning for ABC",
+        "description": "Backend monitor detected repeated timesheet validation failures.",
+        "status": {
+          "name": "In Progress"
+        },
+        "assignee": null,
+        "created": "2026-06-02T08:00:00.000+0000",
+        "updated": "2026-06-02T09:30:00.000+0000",
+        "resolutiondate": null,
+        "labels": ["wapm"],
+        "components": [
+          {
+            "name": "Timesheet"
+          }
+        ],
+        "customfield_20014": {
+          "value": "CL17"
+        },
+        "customfield_20034": {
+          "value": "ABC"
+        },
+        "customfield_20032": {
+          "value": "PRD"
+        }
+      }
+    }
+  ]
+}
