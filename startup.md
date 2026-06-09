@@ -40,7 +40,6 @@ JIRA_CLIENT_ENV_FIELDS=customfield_20034,customfield_20032
 JIRA_PAGE_SIZE=100
 JIRA_MAX_RESULTS=5000
 CACHE_REFRESH_INTERVAL_MINUTES=5
-ALERT_TYPE_RULES_FILE=alert_type_rules.json
 CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
@@ -111,5 +110,8 @@ project = "Workforce AppMonitoring" AND created >= -7d ORDER BY created DESC
 - The frontend never calls Jira directly. It calls the FastAPI backend only.
 - The backend fetches Jira tickets into an in-memory cache.
 - The cache refreshes every 5 minutes.
+- Tickets are grouped by issue category derived from the Jira summary.
+- Click a ticket in the tree to open the slide-in details panel.
+- `ALERT_TYPE_RULES_FILE` is no longer used; remove it from an existing `backend\.env` if present.
 - Version 1 does not use a database.
 - Do not commit a real `backend\.env` file or Jira PAT.

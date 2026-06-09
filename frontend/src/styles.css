@@ -35,7 +35,7 @@ body {
 .metrics-grid {
   display: grid;
   gap: 16px;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
 }
 
 .metric-card {
@@ -79,23 +79,63 @@ body {
   min-height: 420px;
 }
 
-.content-grid {
-  display: grid;
-  gap: 24px;
-  grid-template-columns: minmax(0, 2fr) minmax(360px, 1fr);
+.content-area {
+  display: flex;
+  gap: 0;
+  min-height: 560px;
+  overflow: hidden;
+  position: relative;
+}
+
+.hierarchy-panel {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: auto;
+  transition: flex-basis 0.32s cubic-bezier(0.4, 0, 0.2, 1), margin-right 0.32s ease;
+}
+
+.content-area--details-open .hierarchy-panel {
+  flex: 1 1 calc(100% - 444px);
+  margin-right: 24px;
+}
+
+.details-backdrop {
+  display: none;
+}
+
+.details-drawer {
+  border-top: 4px solid #000000;
+  flex: 0 0 0;
+  max-width: 0;
+  min-height: 560px;
+  min-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding: 0;
+  pointer-events: none;
+  transform: translateX(100%);
+  transition:
+    flex-basis 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    max-width 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.24s ease,
+    padding 0.32s ease;
+  z-index: 2;
+}
+
+.details-drawer--open {
+  flex: 0 0 420px;
+  max-width: 420px;
+  opacity: 1;
+  overflow: auto;
+  padding: 22px;
+  pointer-events: auto;
+  transform: translateX(0);
 }
 
 .dashboard-panel {
   min-height: 560px;
   padding: 22px;
-}
-
-.hierarchy-panel {
-  overflow: auto;
-}
-
-.details-panel {
-  border-top: 4px solid #000000;
 }
 
 .panel-chip,
@@ -137,6 +177,16 @@ body {
   border-color: #000000 !important;
 }
 
+.search-result--selected {
+  background: #ececec !important;
+  border-color: #000000 !important;
+}
+
+.tree-item--selected > .MuiTreeItem-content {
+  background: #e0e0e0 !important;
+  border: 1px solid #000000;
+}
+
 .status-chip {
   border: 1px solid #bdbdbd !important;
   font-weight: 800;
@@ -163,8 +213,34 @@ body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .content-grid {
-    grid-template-columns: 1fr;
+  .content-area--details-open .hierarchy-panel {
+    flex: 1 1 auto;
+    margin-right: 0;
+  }
+
+  .details-backdrop {
+    background: rgba(0, 0, 0, 0.18);
+    display: block;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    transition: opacity 0.32s ease;
+    z-index: 1;
+  }
+
+  .details-backdrop--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .details-drawer--open {
+    flex: 0 0 min(100%, 420px);
+    max-width: min(100%, 420px);
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
   }
 }
 

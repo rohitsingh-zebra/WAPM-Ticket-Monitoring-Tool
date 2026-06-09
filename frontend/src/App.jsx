@@ -20,7 +20,7 @@ import Typography from "@mui/material/Typography";
 import { getCacheStatus, getHierarchy, getSummary, refreshCache, searchTickets } from "./api/client";
 import HierarchyTree from "./components/HierarchyTree";
 import MetricCard from "./components/MetricCard";
-import TicketDetails from "./components/TicketDetails";
+import TicketDetailsPanel from "./components/TicketDetailsPanel";
 
 const formatTime = (value) => {
   if (!value) {
@@ -77,8 +77,7 @@ function App() {
       ["To Do", summary?.open_tickets],
       ["In Progress", summary?.in_progress_tickets],
       ["Resolved", summary?.resolved_tickets],
-      ["Clusters", summary?.total_clusters],
-      ["Client Envs", summary?.total_organizations],
+      ["Issue Categories", summary?.total_categories],
       ["Last Refresh", formatTime(summary?.last_refresh_time)],
     ];
   }, [summaryQuery.data]);
@@ -121,7 +120,7 @@ function App() {
 
               <TextField
                 fullWidth
-                label="Search ticket ID, cluster_id, clientId Env, Alert Type, or summary"
+                label="Search ticket ID, issue category, cluster_id, clientId Env, or summary"
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
               />
@@ -158,15 +157,15 @@ function App() {
               <CircularProgress />
             </Box>
           ) : (
-            <Box className="content-grid">
+            <Box className={`content-area ${selectedTicket ? "content-area--details-open" : ""}`}>
               <Paper elevation={0} className="dashboard-panel hierarchy-panel">
                 <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
                   <Box>
                     <Typography variant="h6" fontWeight={800}>
-                      Ticket Hierarchy
+                      Tickets by Issue Category
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      cluster_id {"->"} clientId Env {"->"} Alert Type
+                      Grouped dynamically from ticket issue names
                     </Typography>
                   </Box>
                   <Chip label={`${days} day view`} className="panel-chip" />
@@ -181,13 +180,13 @@ function App() {
                           key={ticket.key}
                           variant="outlined"
                           color="inherit"
-                          className="search-result"
+                          className={`search-result ${selectedTicket?.key === ticket.key ? "search-result--selected" : ""}`}
                           onClick={() => setSelectedTicket(ticket)}
                         >
                           <Box textAlign="left" width="100%">
                             <Typography fontWeight={700}>{ticket.key}</Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {ticket.cluster} / {ticket.organization} / {ticket.category}
+                              {ticket.category} | {ticket.cluster} / {ticket.organization}
                             </Typography>
                             <Typography variant="body2">{ticket.summary}</Typography>
                           </Box>
@@ -195,16 +194,19 @@ function App() {
                       ))}
                     </Stack>
                   ) : (
-                    <HierarchyTree nodes={hierarchyQuery.data?.data ?? []} onTicketSelect={setSelectedTicket} />
+                    <HierarchyTree
+                      nodes={hierarchyQuery.data?.data ?? []}
+                      onTicketSelect={setSelectedTicket}
+                      selectedTicketKey={selectedTicket?.key}
+                    />
                   )}
               </Paper>
 
-              <Paper elevation={0} className="dashboard-panel details-panel">
-                <Typography variant="h6" fontWeight={800} sx={{ mb: 2 }}>
-                  Ticket Details
-                </Typography>
-                <TicketDetails ticket={selectedTicket} />
-              </Paper>
+              <TicketDetailsPanel
+                ticket={selectedTicket}
+                open={Boolean(selectedTicket)}
+                onClose={() => setSelectedTicket(null)}
+              />
             </Box>
           )}
         </Stack>

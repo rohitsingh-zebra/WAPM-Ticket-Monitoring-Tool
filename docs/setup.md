@@ -39,17 +39,18 @@ npm run dev
 
 The dashboard runs at `http://localhost:5173`.
 
-## Alert Type Rules
+## Issue Categories
 
-Edit `backend\alert_type_rules.json` to change Alert Type matching without modifying code.
+Tickets are grouped automatically by issue name extracted from the Jira summary. No configuration file is required.
 
-Example:
+When a new ticket pattern appears in Jira, the next cache refresh creates a new category group if the extracted issue name differs from existing categories.
 
-```json
-{
-  "Payroll": ["payroll"],
-  "Timesheet": ["timesheet", "time sheet"]
-}
-```
+To adjust how categories are parsed, edit `backend/app/services/category_classifier.py`.
 
-Tickets that do not match any rule are assigned to `Others`.
+## Dashboard Usage
+
+1. Select **Last 2 Days** or **Last 7 Days** from the date filter.
+2. Browse tickets in the **Tickets by Issue Category** tree.
+3. Click a ticket to open the slide-in details panel from the right.
+4. Use **Search** to find tickets by key, category, cluster, client env, or summary text.
+5. Click **Refresh** to trigger an immediate Jira cache reload.

@@ -1,5 +1,4 @@
 from functools import lru_cache
-from pathlib import Path
 
 from pydantic import AliasChoices, Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -17,10 +16,6 @@ class Settings(BaseSettings):
     jira_page_size: int = Field(100, alias="JIRA_PAGE_SIZE")
     jira_max_results: int = Field(5000, alias="JIRA_MAX_RESULTS")
     cache_refresh_interval_minutes: int = Field(5, alias="CACHE_REFRESH_INTERVAL_MINUTES")
-    alert_type_rules_file: Path = Field(
-        Path("alert_type_rules.json"),
-        validation_alias=AliasChoices("ALERT_TYPE_RULES_FILE", "CATEGORY_RULES_FILE"),
-    )
     cors_origins: str = Field("http://localhost:5173", alias="CORS_ORIGINS")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8-sig", extra="ignore")

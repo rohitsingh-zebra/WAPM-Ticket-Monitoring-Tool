@@ -1,8 +1,16 @@
 # WAPM Ticket Monitoring Dashboard
 
-Web dashboard for monitoring WAPM Jira tickets by `cluster_id`, `clientId Env`, `Alert Type`, and ticket.
+Web dashboard for monitoring WAPM Jira tickets grouped by **issue category** (derived dynamically from ticket summaries) with a slide-in ticket details panel.
 
 Version 1 uses Jira as the source of truth and keeps all data in an in-memory FastAPI cache. No database is required.
+
+## Features
+
+- **Dynamic issue categories** — tickets are grouped by issue name extracted from the summary (for example, `Stuck UploadFile`, `Cognos Schdule Extracts files not found`). New categories appear automatically as new ticket patterns arrive.
+- **Two-level hierarchy** — Issue Category → Tickets (no cluster or client-env nesting).
+- **Slide-in details panel** — click a ticket to open an animated details drawer from the right; the ticket list shrinks to make room.
+- **Search and filters** — search by ticket ID, issue category, cluster, client env, or summary; filter by last 2 or 7 days.
+- **Summary metrics** — total, status breakdown, issue category count, and last refresh time.
 
 ## Stack
 
@@ -51,7 +59,7 @@ npm run dev
 
 ## Documentation
 
-- `docs/architecture.md`
-- `docs/api.md`
-- `docs/setup.md`
-- `docs/deployment.md`
+- `startup.md` — step-by-step run guide
+- `docs/architecture.md` — system design and data flow
+- `docs/api.md` — REST API reference
+- `docs/setup.md` — local development setup

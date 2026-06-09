@@ -23,24 +23,27 @@ function NodeLabel({ node }) {
   );
 }
 
-function renderNode(node, onTicketSelect) {
+function renderNode(node, onTicketSelect, selectedTicketKey) {
+  const isSelectedTicket = node.type === "ticket" && node.ticket?.key === selectedTicketKey;
+
   return (
     <TreeItem
       key={node.id}
       itemId={node.id}
       label={<NodeLabel node={node} />}
+      className={isSelectedTicket ? "tree-item--selected" : undefined}
       onClick={() => {
         if (node.type === "ticket") {
           onTicketSelect(node.ticket);
         }
       }}
     >
-      {(node.children ?? []).map((child) => renderNode(child, onTicketSelect))}
+      {(node.children ?? []).map((child) => renderNode(child, onTicketSelect, selectedTicketKey))}
     </TreeItem>
   );
 }
 
-function HierarchyTree({ nodes, onTicketSelect }) {
+function HierarchyTree({ nodes, onTicketSelect, selectedTicketKey }) {
   const expandableIds = useMemo(() => collectExpandableIds(nodes), [nodes]);
   const [expandedItems, setExpandedItems] = useState([]);
 
@@ -58,7 +61,7 @@ function HierarchyTree({ nodes, onTicketSelect }) {
         <Typography color="text.secondary">No tickets found for this filter.</Typography>
       ) : (
         <SimpleTreeView expandedItems={expandedItems} onExpandedItemsChange={(_, itemIds) => setExpandedItems(itemIds)}>
-          {nodes.map((node) => renderNode(node, onTicketSelect))}
+          {nodes.map((node) => renderNode(node, onTicketSelect, selectedTicketKey))}
         </SimpleTreeView>
       )}
     </Stack>

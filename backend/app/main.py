@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 ticket_cache = TicketCache(
     jira_client=JiraClient(settings),
-    classifier=CategoryClassifier(settings.alert_type_rules_file),
+    classifier=CategoryClassifier(),
 )
 scheduler = AsyncIOScheduler()
 
@@ -52,7 +52,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="WAPM Ticket Monitoring API",
-    description="FastAPI backend for monitoring WAPM Jira ticket volumes.",
+    description="FastAPI backend for monitoring WAPM Jira tickets grouped by dynamic issue category.",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -84,4 +84,4 @@ app.include_router(router)
 
 @app.get("/health")
 def health() -> dict[str, str]:
-    return {"status": "ok"}
+    return {"status": "ok, server running"}

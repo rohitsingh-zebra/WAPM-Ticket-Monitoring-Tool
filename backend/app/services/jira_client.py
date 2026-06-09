@@ -26,6 +26,7 @@ class JiraClient:
             "resolutiondate",
             "labels",
             "components",
+            "issuetype",
             self.settings.jira_cluster_field,
             *self.settings.jira_client_env_field_ids,
         ]
@@ -83,6 +84,7 @@ class JiraClient:
             jira_url=f"{self.settings.jira_base_url}/browse/{issue.get('key', '')}",
             cluster=self._extract_field_value(fields.get(self.settings.jira_cluster_field)) or "Unassigned Cluster",
             organization=self._extract_client_env(fields) or "Unassigned Client Env",
+            issue_type=(fields.get("issuetype") or {}).get("name") or "Unknown",
             labels=[str(label) for label in fields.get("labels") or []],
             components=[component.get("name", "") for component in fields.get("components") or []],
         )

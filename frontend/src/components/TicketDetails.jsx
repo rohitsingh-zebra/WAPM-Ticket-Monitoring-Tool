@@ -30,11 +30,7 @@ const statusClassName = (status) => {
 
 function TicketDetails({ ticket }) {
   if (!ticket) {
-    return (
-      <Typography color="text.secondary">
-        Select a ticket in the hierarchy to view details.
-      </Typography>
-    );
+    return null;
   }
 
   return (
@@ -46,10 +42,16 @@ function TicketDetails({ ticket }) {
       <Typography fontWeight={600}>{ticket.summary}</Typography>
       <Box>
         <Typography variant="body2" color="text.secondary">
-          cluster_id / clientId Env / Alert Type
+          Issue Category
+        </Typography>
+        <Typography>{ticket.category}</Typography>
+      </Box>
+      <Box>
+        <Typography variant="body2" color="text.secondary">
+          cluster_id / clientId Env
         </Typography>
         <Typography>
-          {ticket.cluster} / {ticket.organization} / {ticket.category}
+          {ticket.cluster} / {ticket.organization}
         </Typography>
       </Box>
       <Box>

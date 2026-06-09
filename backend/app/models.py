@@ -18,7 +18,8 @@ class Ticket(BaseModel):
     jira_url: str
     cluster: str
     organization: str
-    category: str = "Others"
+    issue_type: str = "Unknown"  # Jira issuetype metadata; grouping uses `category`
+    category: str = "Others"  # Dynamically derived issue category from summary
     labels: list[str] = Field(default_factory=list)
     components: list[str] = Field(default_factory=list)
 
@@ -28,7 +29,7 @@ class Ticket(BaseModel):
 class HierarchyNode(BaseModel):
     id: str
     label: str
-    type: Literal["cluster", "organization", "category", "ticket"]
+    type: Literal["category", "ticket"]
     count: int
     children: list["HierarchyNode"] = Field(default_factory=list)
     ticket: Ticket | None = None
@@ -39,8 +40,7 @@ class DashboardSummary(BaseModel):
     open_tickets: int
     in_progress_tickets: int
     resolved_tickets: int
-    total_clusters: int
-    total_organizations: int
+    total_categories: int
     last_refresh_time: datetime | None
 
 

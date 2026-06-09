@@ -1,3 +1,5 @@
+"""Builds and serves cached Jira datasets grouped by dynamic issue category."""
+
 import asyncio
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -30,7 +32,7 @@ class TicketCache:
             self._health_status = "refreshing"
             try:
                 seven_day_tickets = await self.jira_client.fetch_recent_tickets(days=7)
-                categorized_tickets = [self._categorize(ticket) for ticket in seven_day_tickets]
+                categorized_tickets = [self._normalize_ticket(ticket) for ticket in seven_day_tickets]
                 refresh_time = datetime.now(timezone.utc)
 
                 new_datasets = {
@@ -65,9 +67,9 @@ class TicketCache:
             ticket
             for ticket in self._ticket_index.values()
             if normalized_query in ticket.key.lower()
+            or normalized_query in ticket.category.lower()
             or normalized_query in ticket.cluster.lower()
             or normalized_query in ticket.organization.lower()
-            or normalized_query in ticket.category.lower()
             or normalized_query in ticket.summary.lower()
         ]
 
@@ -90,7 +92,7 @@ class TicketCache:
 
         return self._datasets.get(days) or self._build_dataset([], self._last_refresh_time)
 
-    def _categorize(self, ticket: Ticket) -> Ticket:
+    def _normalize_ticket(self, ticket: Ticket) -> Ticket:
         return ticket.model_copy(update={"category": self.classifier.classify(ticket)})
 
     def _filter_by_days(self, tickets: list[Ticket], days: int) -> list[Ticket]:
@@ -114,71 +116,36 @@ class TicketCache:
             open_tickets=status_counts.get("open", 0) + status_counts.get("to do", 0),
             in_progress_tickets=status_counts.get("in progress", 0),
             resolved_tickets=status_counts.get("resolved", 0) + status_counts.get("done", 0) + status_counts.get("closed", 0),
-            total_clusters=len({ticket.cluster for ticket in tickets}),
-            total_organizations=len({ticket.organization for ticket in tickets}),
+            total_categories=len({ticket.category for ticket in tickets}),
             last_refresh_time=refresh_time,
         )
 
     def _build_hierarchy(self, tickets: list[Ticket]) -> list[HierarchyNode]:
-        clusters: dict[str, dict[str, dict[str, list[Ticket]]]] = {}
+        categories: dict[str, list[Ticket]] = {}
 
         for ticket in tickets:
-            clusters.setdefault(ticket.cluster, {}).setdefault(ticket.organization, {}).setdefault(ticket.category, []).append(ticket)
+            categories.setdefault(ticket.category, []).append(ticket)
 
-        cluster_nodes: list[HierarchyNode] = []
-        for cluster_name in sorted(clusters):
-            org_nodes: list[HierarchyNode] = []
-            cluster_count = 0
-
-            for org_name in sorted(clusters[cluster_name]):
-                category_nodes: list[HierarchyNode] = []
-                org_count = 0
-
-                for category_name in sorted(clusters[cluster_name][org_name]):
-                    category_tickets = sorted(
-                        clusters[cluster_name][org_name][category_name],
-                        key=lambda ticket: ticket.created,
-                        reverse=True,
-                    )
-                    org_count += len(category_tickets)
-                    category_nodes.append(
-                        HierarchyNode(
-                            id=f"{cluster_name}/{org_name}/{category_name}",
-                            label=category_name,
-                            type="category",
-                            count=len(category_tickets),
-                            children=[
-                                HierarchyNode(
-                                    id=ticket.key,
-                                    label=f"{ticket.key}: {ticket.summary}",
-                                    type="ticket",
-                                    count=1,
-                                    ticket=ticket,
-                                )
-                                for ticket in category_tickets
-                            ],
-                        )
-                    )
-
-                cluster_count += org_count
-                org_nodes.append(
-                    HierarchyNode(
-                        id=f"{cluster_name}/{org_name}",
-                        label=org_name,
-                        type="organization",
-                        count=org_count,
-                        children=category_nodes,
-                    )
-                )
-
-            cluster_nodes.append(
+        category_nodes: list[HierarchyNode] = []
+        for category_name in sorted(categories):
+            category_tickets = sorted(categories[category_name], key=lambda ticket: ticket.created, reverse=True)
+            category_nodes.append(
                 HierarchyNode(
-                    id=cluster_name,
-                    label=cluster_name,
-                    type="cluster",
-                    count=cluster_count,
-                    children=org_nodes,
+                    id=f"category::{category_name}",
+                    label=category_name,
+                    type="category",
+                    count=len(category_tickets),
+                    children=[
+                        HierarchyNode(
+                            id=ticket.key,
+                            label=f"{ticket.key}: {ticket.summary}",
+                            type="ticket",
+                            count=1,
+                            ticket=ticket,
+                        )
+                        for ticket in category_tickets
+                    ],
                 )
             )
 
-        return cluster_nodes
+        return category_nodes
