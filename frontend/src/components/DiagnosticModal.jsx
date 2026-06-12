@@ -129,10 +129,17 @@ function DiagnosticModal({ ticket, open, onClose }) {
     });
   }, [dateSort, files, nameSort, primarySort, searchTerm]);
 
+  const handleDialogClose = (_event, reason) => {
+    if (reason === "backdropClick") {
+      return;
+    }
+    onClose();
+  };
+
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={handleDialogClose}
       maxWidth={false}
       fullWidth
       sx={{
@@ -196,10 +203,14 @@ function DiagnosticModal({ ticket, open, onClose }) {
               disabled={diagnosticMutation.isPending || otp.trim().length === 0}
               onClick={() => diagnosticMutation.mutate({ ticketId: ticket.key, secondPassword: otp.trim() })}
               sx={{
-                minWidth: 110,
+                minWidth: 78,
+                minHeight: 34,
                 borderRadius: "8px",
                 textTransform: "none",
                 fontWeight: 700,
+                px: 1.2,
+                py: 0.25,
+                lineHeight: 1.15,
                 whiteSpace: "nowrap",
               }}
             >
@@ -221,67 +232,71 @@ function DiagnosticModal({ ticket, open, onClose }) {
       </Box>
 
       <Box className="diagnostic-modal-table-shell">
-        <Box className="diagnostic-modal-table-toolbar">
-          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-            <Typography variant="body2" fontWeight={700}>
-              Files Found: {diagnosticResult?.success ? diagnosticResult.file_count : 0}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              Times shown in UTC
-            </Typography>
-          </Stack>
-          <TextField
-            size="small"
-            label="Search file name"
-            value={searchTerm}
-            disabled={!diagnosticResult?.success}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            sx={{ minWidth: 250 }}
-          />
-        </Box>
-
-        <Box className="diagnostic-modal-table-scroll">
-          <Box className="diagnostic-modal-table">
-            <Box className="diagnostic-modal-row diagnostic-modal-row--header">
-              <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-                <Typography variant="caption" fontWeight={700}>
-                  File Name
+        {diagnosticResult?.success ? (
+          <>
+            <Box className="diagnostic-modal-table-toolbar">
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                <Typography variant="body2" fontWeight={700}>
+                  Files Found: {diagnosticResult.file_count}
                 </Typography>
-                <IconButton size="small" disabled={!diagnosticResult?.success} onClick={(event) => setNameMenuAnchor(event.currentTarget)}>
-                  <FilterListIcon fontSize="inherit" />
-                </IconButton>
-              </Stack>
-              <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", justifyContent: "flex-start" }}>
-                <Typography variant="caption" fontWeight={700}>
-                  Changed (UTC)
+                <Typography variant="caption" color="text.secondary">
+                  Times shown in UTC
                 </Typography>
-                <IconButton size="small" disabled={!diagnosticResult?.success} onClick={(event) => setDateMenuAnchor(event.currentTarget)}>
-                  <FilterListIcon fontSize="inherit" />
-                </IconButton>
               </Stack>
+              <TextField
+                size="small"
+                label="Search file name"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                sx={{ minWidth: 250 }}
+              />
             </Box>
 
-            {diagnosticResult?.success &&
-              filteredAndSortedFiles.map((file) => (
-                <Box key={`${file.name}-${file.modified_at}`} className="diagnostic-modal-row">
-                  <Typography variant="body2" className="diagnostic-modal-file-name">
-                    {file.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" className="diagnostic-modal-file-time">
-                    {formatDateUtc(file.modified_at)}
-                  </Typography>
+            <Box className="diagnostic-modal-table-scroll">
+              <Box className="diagnostic-modal-table">
+                <Box className="diagnostic-modal-row diagnostic-modal-row--header">
+                  <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                    <Typography variant="caption" fontWeight={700}>
+                      File Name
+                    </Typography>
+                    <IconButton size="small" onClick={(event) => setNameMenuAnchor(event.currentTarget)}>
+                      <FilterListIcon fontSize="inherit" />
+                    </IconButton>
+                  </Stack>
+                  <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", justifyContent: "flex-start" }}>
+                    <Typography variant="caption" fontWeight={700}>
+                      Changed (UTC)
+                    </Typography>
+                    <IconButton size="small" onClick={(event) => setDateMenuAnchor(event.currentTarget)}>
+                      <FilterListIcon fontSize="inherit" />
+                    </IconButton>
+                  </Stack>
                 </Box>
-              ))}
 
-            {(!diagnosticResult?.success || filteredAndSortedFiles.length === 0) && (
-              <Box className="diagnostic-modal-empty-row">
-                <Typography variant="body2" color="text.secondary">
-                  {diagnosticResult?.success ? "No files match the current search/filter." : "Run diagnostic to load file list."}
-                </Typography>
+                {filteredAndSortedFiles.map((file) => (
+                  <Box key={`${file.name}-${file.modified_at}`} className="diagnostic-modal-row">
+                    <Typography variant="body2" className="diagnostic-modal-file-name">
+                      {file.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" className="diagnostic-modal-file-time">
+                      {formatDateUtc(file.modified_at)}
+                    </Typography>
+                  </Box>
+                ))}
+
+                {filteredAndSortedFiles.length === 0 && (
+                  <Box className="diagnostic-modal-empty-row">
+                    <Typography variant="body2" color="text.secondary">
+                      No files match the current search/filter.
+                    </Typography>
+                  </Box>
+                )}
               </Box>
-            )}
-          </Box>
-        </Box>
+            </Box>
+          </>
+        ) : (
+          <Box className="diagnostic-modal-table-empty" />
+        )}
       </Box>
 
       <Menu anchorEl={nameMenuAnchor} open={Boolean(nameMenuAnchor)} onClose={() => setNameMenuAnchor(null)}>
