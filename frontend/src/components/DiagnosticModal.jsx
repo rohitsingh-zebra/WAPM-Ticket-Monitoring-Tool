@@ -135,16 +135,22 @@ function DiagnosticModal({ ticket, open, onClose }) {
       onClose={onClose}
       maxWidth={false}
       fullWidth
-      PaperProps={{
-        className: "diagnostic-modal-paper",
-        sx: {
+      sx={{
+        "& .MuiDialog-paper": {
           width: "60vw !important",
           minWidth: "60vw !important",
           maxWidth: "60vw !important",
           height: "80vh !important",
           minHeight: "80vh !important",
           maxHeight: "80vh !important",
+          margin: "0 !important",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
         },
+      }}
+      PaperProps={{
+        className: "diagnostic-modal-paper",
       }}
     >
       <Box className="diagnostic-modal-header">
@@ -214,48 +220,49 @@ function DiagnosticModal({ ticket, open, onClose }) {
         )}
       </Box>
 
-      {diagnosticResult?.success && (
-        <Box className="diagnostic-modal-table-shell">
-          <Box className="diagnostic-modal-table-toolbar">
-            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-              <Typography variant="body2" fontWeight={700}>
-                Files Found: {diagnosticResult.file_count}
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Times shown in UTC
-              </Typography>
-            </Stack>
-            <TextField
-              size="small"
-              label="Search file name"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              sx={{ minWidth: 250 }}
-            />
-          </Box>
+      <Box className="diagnostic-modal-table-shell">
+        <Box className="diagnostic-modal-table-toolbar">
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+            <Typography variant="body2" fontWeight={700}>
+              Files Found: {diagnosticResult?.success ? diagnosticResult.file_count : 0}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Times shown in UTC
+            </Typography>
+          </Stack>
+          <TextField
+            size="small"
+            label="Search file name"
+            value={searchTerm}
+            disabled={!diagnosticResult?.success}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            sx={{ minWidth: 250 }}
+          />
+        </Box>
 
-          <Box className="diagnostic-modal-table-scroll">
-            <Box className="diagnostic-modal-table">
-              <Box className="diagnostic-modal-row diagnostic-modal-row--header">
-                <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-                  <Typography variant="caption" fontWeight={700}>
-                    File Name
-                  </Typography>
-                  <IconButton size="small" onClick={(event) => setNameMenuAnchor(event.currentTarget)}>
-                    <FilterListIcon fontSize="inherit" />
-                  </IconButton>
-                </Stack>
-                <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", justifyContent: "flex-start" }}>
-                  <Typography variant="caption" fontWeight={700}>
-                    Changed (UTC)
-                  </Typography>
-                  <IconButton size="small" onClick={(event) => setDateMenuAnchor(event.currentTarget)}>
-                    <FilterListIcon fontSize="inherit" />
-                  </IconButton>
-                </Stack>
-              </Box>
+        <Box className="diagnostic-modal-table-scroll">
+          <Box className="diagnostic-modal-table">
+            <Box className="diagnostic-modal-row diagnostic-modal-row--header">
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+                <Typography variant="caption" fontWeight={700}>
+                  File Name
+                </Typography>
+                <IconButton size="small" disabled={!diagnosticResult?.success} onClick={(event) => setNameMenuAnchor(event.currentTarget)}>
+                  <FilterListIcon fontSize="inherit" />
+                </IconButton>
+              </Stack>
+              <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", justifyContent: "flex-start" }}>
+                <Typography variant="caption" fontWeight={700}>
+                  Changed (UTC)
+                </Typography>
+                <IconButton size="small" disabled={!diagnosticResult?.success} onClick={(event) => setDateMenuAnchor(event.currentTarget)}>
+                  <FilterListIcon fontSize="inherit" />
+                </IconButton>
+              </Stack>
+            </Box>
 
-              {filteredAndSortedFiles.map((file) => (
+            {diagnosticResult?.success &&
+              filteredAndSortedFiles.map((file) => (
                 <Box key={`${file.name}-${file.modified_at}`} className="diagnostic-modal-row">
                   <Typography variant="body2" className="diagnostic-modal-file-name">
                     {file.name}
@@ -266,17 +273,16 @@ function DiagnosticModal({ ticket, open, onClose }) {
                 </Box>
               ))}
 
-              {filteredAndSortedFiles.length === 0 && (
-                <Box className="diagnostic-modal-empty-row">
-                  <Typography variant="body2" color="text.secondary">
-                    No files match the current search/filter.
-                  </Typography>
-                </Box>
-              )}
-            </Box>
+            {(!diagnosticResult?.success || filteredAndSortedFiles.length === 0) && (
+              <Box className="diagnostic-modal-empty-row">
+                <Typography variant="body2" color="text.secondary">
+                  {diagnosticResult?.success ? "No files match the current search/filter." : "Run diagnostic to load file list."}
+                </Typography>
+              </Box>
+            )}
           </Box>
         </Box>
-      )}
+      </Box>
 
       <Menu anchorEl={nameMenuAnchor} open={Boolean(nameMenuAnchor)} onClose={() => setNameMenuAnchor(null)}>
         <MenuItem
