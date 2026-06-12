@@ -183,40 +183,48 @@ function DiagnosticModal({ ticket, open, onClose }) {
 
         {precheckResult?.success && (
           <Typography variant="body2" color="text.secondary">
-            Host: {precheckResult.host_name}
+            Hostname: {precheckResult.host_name}
           </Typography>
         )}
 
         {isOtpVisible && (
-          <Stack direction={{ xs: "column", md: "row" }} spacing={1}>
-            <TextField
-              label="Please enter second password / OTP"
-              value={otp}
-              size="small"
-              fullWidth
-              error={diagnosticResult?.error_code === "INVALID_OTP"}
-              helperText={diagnosticResult?.error_code === "INVALID_OTP" ? "Please enter correct second password/OTP." : " "}
-              onChange={(event) => setOtp(event.target.value)}
-            />
-            <Button
-              variant="contained"
-              disabled={diagnosticMutation.isPending || otp.trim().length === 0}
-              onClick={() => diagnosticMutation.mutate({ ticketId: ticket.key, secondPassword: otp.trim() })}
-              sx={{
-                minWidth: 78,
-                minHeight: 34,
-                borderRadius: "8px",
-                textTransform: "none",
-                fontWeight: 700,
-                px: 1.2,
-                py: 0.25,
-                lineHeight: 1.15,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {diagnosticMutation.isPending ? "Submitting..." : "Submit"}
-            </Button>
-          </Stack>
+          <>
+            <Stack direction={{ xs: "column", md: "row" }} spacing={1} sx={{ alignItems: { md: "flex-start" } }}>
+              <Box sx={{ flex: 1 }}>
+                <TextField
+                  label="Please enter second password / OTP"
+                  value={otp}
+                  size="small"
+                  fullWidth
+                  error={diagnosticResult?.error_code === "INVALID_OTP"}
+                  onChange={(event) => setOtp(event.target.value)}
+                />
+              </Box>
+              <Button
+                size="small"
+                variant="contained"
+                disabled={diagnosticMutation.isPending || otp.trim().length === 0}
+                onClick={() => diagnosticMutation.mutate({ ticketId: ticket.key, secondPassword: otp.trim() })}
+                sx={{
+                  minWidth: 92,
+                  height: 40,
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  fontWeight: 700,
+                  px: 1.2,
+                  lineHeight: 1.15,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {diagnosticMutation.isPending ? "Submitting..." : "Submit"}
+              </Button>
+            </Stack>
+            {diagnosticResult?.error_code === "INVALID_OTP" && (
+              <Typography variant="caption" color="error" sx={{ mt: -0.5 }}>
+                Please enter correct second password/OTP.
+              </Typography>
+            )}
+          </>
         )}
 
         {diagnosticMutation.isPending && (
