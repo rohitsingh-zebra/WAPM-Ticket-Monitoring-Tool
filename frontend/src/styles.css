@@ -214,6 +214,92 @@ body {
   padding-top: 8px;
 }
 
+.diagnostic-modal-paper {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.diagnostic-modal-header {
+  align-items: center;
+  border-bottom: 1px solid #dcdcdc;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+}
+
+.diagnostic-modal-status-box {
+  border-bottom: 1px solid #e5e5e5;
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+}
+
+.diagnostic-modal-table-shell {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  padding: 12px 14px;
+}
+
+.diagnostic-modal-table-toolbar {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.diagnostic-modal-table-scroll {
+  border: 1px solid #dedede;
+  border-radius: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.diagnostic-modal-table {
+  min-width: 100%;
+  width: 100%;
+}
+
+.diagnostic-modal-row {
+  align-items: center;
+  border-bottom: 1px solid #efefef;
+  column-gap: 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 70%) minmax(0, 30%);
+  min-width: 100%;
+  padding: 8px 10px;
+}
+
+.diagnostic-modal-row--header {
+  background: #fff;
+  border-bottom-color: #dcdcdc;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.diagnostic-modal-file-name,
+.diagnostic-modal-file-time {
+  white-space: nowrap;
+}
+
+.diagnostic-modal-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diagnostic-modal-file-time {
+  text-align: left;
+}
+
+.diagnostic-modal-empty-row {
+  padding: 10px;
+}
+
 .diagnostic-file-list {
   border: 1px solid #dddddd;
   border-radius: 8px;
@@ -294,6 +380,10 @@ body {
     right: 0;
     top: 0;
     bottom: 0;
+  }
+
+  .diagnostic-modal-paper {
+    overflow: hidden;
   }
 }
 
