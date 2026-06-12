@@ -208,6 +208,59 @@ body {
   color: #111111 !important;
 }
 
+.diagnostic-box {
+  border-top: 1px solid #dedede;
+  margin-top: 6px;
+  padding-top: 8px;
+}
+
+.diagnostic-file-list {
+  border: 1px solid #dddddd;
+  border-radius: 8px;
+  max-height: 220px;
+  overflow: auto;
+  background: #fff;
+  padding: 0;
+}
+
+.diagnostic-file-table {
+  background: #fff;
+  min-width: 100%;
+  width: max-content;
+}
+
+.diagnostic-file-row {
+  align-items: center;
+  border-bottom: 1px solid #efefef;
+  column-gap: 16px;
+  display: grid;
+  grid-template-columns: max-content max-content;
+  padding: 9px 10px;
+  width: 100%;
+}
+
+.diagnostic-file-row:last-child {
+  border-bottom: none;
+}
+
+.diagnostic-file-row--header {
+  background: #ffffff;
+  border-bottom-color: #dcdcdc;
+  font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  box-shadow: 0 1px 0 #e6e6e6;
+}
+
+.diagnostic-file-name {
+  white-space: nowrap;
+}
+
+.diagnostic-file-time {
+  white-space: nowrap;
+}
+
 @media (max-width: 1200px) {
   .metrics-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));

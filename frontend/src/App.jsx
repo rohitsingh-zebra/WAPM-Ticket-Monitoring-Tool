@@ -104,7 +104,7 @@ function App() {
       <Container maxWidth="xl" sx={{ py: 3 }}>
         <Stack spacing={3}>
           <Paper elevation={0} className="control-panel">
-            <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ md: "center" }}>
+            <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ alignItems: { md: "center" } }}>
               <FormControl sx={{ minWidth: 180 }}>
                 <InputLabel id="days-filter-label">Date Filter</InputLabel>
                 <Select
@@ -159,7 +159,7 @@ function App() {
           ) : (
             <Box className={`content-area ${selectedTicket ? "content-area--details-open" : ""}`}>
               <Paper elevation={0} className="dashboard-panel hierarchy-panel">
-                <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" spacing={1.5} sx={{ mb: 2 }}>
+                <Stack direction={{ xs: "column", md: "row" }} spacing={1.5} sx={{ mb: 2, justifyContent: "space-between" }}>
                   <Box>
                     <Typography variant="h6" fontWeight={800}>
                       Tickets by Issue Category

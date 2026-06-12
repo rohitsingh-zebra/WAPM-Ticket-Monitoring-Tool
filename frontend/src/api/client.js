@@ -29,3 +29,18 @@ export const refreshCache = async () => {
   const response = await api.post("/api/cache/refresh");
   return response.data;
 };
+
+export const runDiagnostic = async ({ ticketId, otp }) => {
+  const response = await api.post("/api/diagnostics/run", {
+    ticket_id: ticketId,
+    otp,
+  });
+  return response.data;
+};
+
+export const precheckDiagnostic = async (ticketId) => {
+  const response = await api.get("/api/diagnostics/precheck", {
+    params: { ticket_id: ticketId },
+  });
+  return response.data;
+};

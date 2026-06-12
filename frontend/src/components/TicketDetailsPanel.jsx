@@ -20,7 +20,7 @@ function TicketDetailsPanel({ ticket, open, onClose }) {
         className={`dashboard-panel details-drawer ${open ? "details-drawer--open" : ""}`}
         aria-hidden={!open}
       >
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+        <Stack direction="row" sx={{ mb: 2, justifyContent: "space-between", alignItems: "center" }}>
           <Typography variant="h6" fontWeight={800}>
             Ticket Details
           </Typography>

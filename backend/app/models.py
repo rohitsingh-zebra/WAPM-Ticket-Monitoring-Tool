@@ -61,3 +61,32 @@ class SearchResponse(BaseModel):
     query: str
     count: int
     tickets: list[Ticket]
+
+
+class DiagnosticFile(BaseModel):
+    name: str
+    modified_at: datetime
+
+
+class DiagnosticRunRequest(BaseModel):
+    ticket_id: str
+    otp: str = Field(min_length=1)
+
+
+class DiagnosticRunResponse(BaseModel):
+    success: bool
+    error_code: str | None = None
+    message: str
+    company: str | None = None
+    host_name: str | None = None
+    remote_path: str | None = None
+    file_count: int = 0
+    files: list[DiagnosticFile] = Field(default_factory=list)
+
+
+class DiagnosticPrecheckResponse(BaseModel):
+    success: bool
+    error_code: str | None = None
+    message: str
+    company: str | None = None
+    host_name: str | None = None

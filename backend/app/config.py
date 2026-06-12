@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     jira_page_size: int = Field(100, alias="JIRA_PAGE_SIZE")
     jira_max_results: int = Field(5000, alias="JIRA_MAX_RESULTS")
     cache_refresh_interval_minutes: int = Field(5, alias="CACHE_REFRESH_INTERVAL_MINUTES")
+    gcp_username: str = Field("", alias="GCP_USERNAME")
+    gcp_password: str = Field("", alias="GCP_PASSWORD")
+    diagnostic_remote_path: str = Field("/mount/RWS4/batch_jobs/in/", alias="DIAGNOSTIC_REMOTE_PATH")
+    diagnostic_ssh_port: int = Field(22, alias="DIAGNOSTIC_SSH_PORT")
     cors_origins: str = Field("http://localhost:5173", alias="CORS_ORIGINS")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8-sig", extra="ignore")
