@@ -90,7 +90,7 @@ function App() {
     <>
       <AppBar position="static" elevation={0} className="top-bar">
         <Toolbar className="top-toolbar">
-          <Box>
+          <Box sx={{ width: "100%", textAlign: "center" }}>
             <Typography variant="h6" component="h1" fontWeight={800}>
               WAPM Ticket Monitoring Dashboard
             </Typography>
