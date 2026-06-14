@@ -31,7 +31,10 @@ class DiagnosticService:
         host_name = precheck.host_name
 
         try:
-            files, invalid_files = self._list_and_validate_remote_files(host_name=host_name, otp=otp.strip())
+            files, invalid_files, older_file_count, newer_file_count = self._list_and_validate_remote_files(
+                host_name=host_name,
+                otp=otp.strip(),
+            )
         except InvalidCredentialsError:
             return DiagnosticRunResponse(
                 success=False,
@@ -71,7 +74,7 @@ class DiagnosticService:
 
         total_file_count = len(files)
         invalid_file_count = len(invalid_files)
-        valid_file_count = total_file_count - invalid_file_count
+        valid_file_count = older_file_count - invalid_file_count
 
         return DiagnosticRunResponse(
             success=True,
@@ -82,6 +85,10 @@ class DiagnosticService:
             file_count=total_file_count,
             files=files,
             total_file_count=total_file_count,
+            stuck_threshold_hours=self.settings.file_min_stuck_hours,
+            max_diagnostic_file_count=self.settings.diagnostic_max_file_count,
+            older_file_count=older_file_count,
+            newer_file_count=newer_file_count,
             valid_file_count=valid_file_count,
             invalid_file_count=invalid_file_count,
             invalid_files=invalid_files,
@@ -126,7 +133,7 @@ class DiagnosticService:
         self,
         host_name: str,
         otp: str,
-    ) -> tuple[list[DiagnosticFile], list[DiagnosticInvalidFile]]:
+    ) -> tuple[list[DiagnosticFile], list[DiagnosticInvalidFile], int, int]:
         if not otp:
             raise InvalidOtpError("Missing OTP")
 
@@ -182,11 +189,12 @@ class DiagnosticService:
                 if S_ISREG(entry.st_mode)
             ]
             files.sort(key=lambda item: item.modified_at, reverse=True)
+            older_files, newer_files = self._split_by_stuck_age(files)
             invalid_files: list[DiagnosticInvalidFile] = []
-            if len(files) > self.settings.diagnostic_max_file_count:
+            if len(older_files) > self.settings.diagnostic_max_file_count:
                 allowed_extensions = self._extract_allowed_extensions_from_script(sftp)
-                invalid_files = self._find_invalid_files(files, allowed_extensions)
-            return files, invalid_files
+                invalid_files = self._find_invalid_files(older_files, allowed_extensions)
+            return files, invalid_files, len(older_files), len(newer_files)
         except (socket.gaierror, socket.timeout, TimeoutError, OSError, paramiko.SSHException) as exc:
             if isinstance(exc, (InvalidCredentialsError, InvalidOtpError)):
                 raise
@@ -273,6 +281,22 @@ class DiagnosticService:
                     invalid_files.append(DiagnosticInvalidFile(name=file.name, reason=reason))
                     break
         return invalid_files
+
+    def _split_by_stuck_age(
+        self,
+        files: list[DiagnosticFile],
+    ) -> tuple[list[DiagnosticFile], list[DiagnosticFile]]:
+        threshold_hours = max(self.settings.file_min_stuck_hours, 0)
+        now_utc = datetime.now(timezone.utc)
+        older_files: list[DiagnosticFile] = []
+        newer_files: list[DiagnosticFile] = []
+        for file in files:
+            age_hours = (now_utc - file.modified_at).total_seconds() / 3600
+            if age_hours >= threshold_hours:
+                older_files.append(file)
+            else:
+                newer_files.append(file)
+        return older_files, newer_files
 
     def _has_whitespace(self, file_name: str, _allowed_extensions: set[str]) -> bool:
         return any(char.isspace() for char in file_name)

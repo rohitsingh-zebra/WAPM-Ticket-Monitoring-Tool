@@ -88,6 +88,10 @@ class DiagnosticRunResponse(BaseModel):
     file_count: int = 0
     files: list[DiagnosticFile] = Field(default_factory=list)
     total_file_count: int = 0
+    stuck_threshold_hours: int = 0
+    max_diagnostic_file_count: int = 0
+    older_file_count: int = 0
+    newer_file_count: int = 0
     valid_file_count: int = 0
     invalid_file_count: int = 0
     invalid_files: list[DiagnosticInvalidFile] = Field(default_factory=list)

@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     diagnostic_remote_path: str = Field("/mount/RWS4/batch_jobs/in/", alias="DIAGNOSTIC_REMOTE_PATH")
     diagnostic_ssh_port: int = Field(22, alias="DIAGNOSTIC_SSH_PORT")
     diagnostic_max_file_count: int = Field(50, alias="MAX_DIAGNOSTIC_FILE_COUNT")
+    file_min_stuck_hours: int = Field(24, alias="FILE_MIN_STUCK_HOURS")
     diagnostic_uploaddata_script_path: str = Field(
         "/mount/RWS4/batch_jobs/scripts/uploaddata.sh",
         alias="DIAGNOSTIC_UPLOADDATA_SCRIPT_PATH",
@@ -33,6 +34,11 @@ class Settings(BaseSettings):
     @classmethod
     def normalize_jira_url(cls, value: str) -> str:
         return value.rstrip("/")
+
+    @field_validator("diagnostic_max_file_count", "file_min_stuck_hours")
+    @classmethod
+    def validate_non_negative_ints(cls, value: int) -> int:
+        return max(value, 0)
 
     @property
     def jira_client_env_field_ids(self) -> list[str]:

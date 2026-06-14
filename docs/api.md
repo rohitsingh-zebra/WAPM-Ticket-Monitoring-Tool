@@ -140,9 +140,13 @@ Returns:
 | `file_count` | Number of matching files found |
 | `files` | Array of diagnostic files (`name`, `modified_at`) |
 | `total_file_count` | Total files read from the diagnostic folder |
-| `valid_file_count` | Files considered valid by current rules |
-| `invalid_file_count` | Files considered invalid by current rules |
-| `invalid_files` | Array of invalid files (`name`, `reason`) |
+| `stuck_threshold_hours` | Hour threshold used for stuck-file evaluation |
+| `max_diagnostic_file_count` | File-count gate used before invalid-file checks run |
+| `older_file_count` | Files with modified time older than threshold |
+| `newer_file_count` | Files with modified time newer than threshold |
+| `valid_file_count` | Older files considered valid by current rules |
+| `invalid_file_count` | Older files considered invalid by current rules (only when `older_file_count > MAX_DIAGNOSTIC_FILE_COUNT`) |
+| `invalid_files` | Invalid older files (`name`, `reason`) when threshold gate is met |
 
 Current invalid-file reasons:
 

@@ -257,7 +257,9 @@ function DiagnosticModal({ ticket, open, onClose }) {
                 </Stack>
                 <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
                   <Typography variant="caption" color="text.secondary">
-                    Found {diagnosticResult.invalid_file_count ?? 0} invalid files
+                    Found {diagnosticResult.invalid_file_count ?? 0} invalid files (checks run when files older than{" "}
+                    {diagnosticResult.stuck_threshold_hours ?? 24}h exceed{" "}
+                    {diagnosticResult.max_diagnostic_file_count ?? 50} files)
                   </Typography>
                   <Button
                     size="small"
