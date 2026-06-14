@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     gcp_password: str = Field("", alias="GCP_PASSWORD")
     diagnostic_remote_path: str = Field("/mount/RWS4/batch_jobs/in/", alias="DIAGNOSTIC_REMOTE_PATH")
     diagnostic_ssh_port: int = Field(22, alias="DIAGNOSTIC_SSH_PORT")
+    diagnostic_max_file_count: int = Field(50, alias="MAX_DIAGNOSTIC_FILE_COUNT")
+    diagnostic_uploaddata_script_path: str = Field(
+        "/mount/RWS4/batch_jobs/scripts/uploaddata.sh",
+        alias="DIAGNOSTIC_UPLOADDATA_SCRIPT_PATH",
+    )
     cors_origins: str = Field("http://localhost:5173", alias="CORS_ORIGINS")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8-sig", extra="ignore")

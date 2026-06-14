@@ -68,6 +68,11 @@ class DiagnosticFile(BaseModel):
     modified_at: datetime
 
 
+class DiagnosticInvalidFile(BaseModel):
+    name: str
+    reason: str
+
+
 class DiagnosticRunRequest(BaseModel):
     ticket_id: str
     otp: str = Field(min_length=1)
@@ -82,6 +87,10 @@ class DiagnosticRunResponse(BaseModel):
     remote_path: str | None = None
     file_count: int = 0
     files: list[DiagnosticFile] = Field(default_factory=list)
+    total_file_count: int = 0
+    valid_file_count: int = 0
+    invalid_file_count: int = 0
+    invalid_files: list[DiagnosticInvalidFile] = Field(default_factory=list)
 
 
 class DiagnosticPrecheckResponse(BaseModel):

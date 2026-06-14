@@ -314,6 +314,21 @@ body {
   padding: 10px;
 }
 
+.diagnostic-invalid-modal-paper {
+  max-height: 72vh;
+}
+
+.diagnostic-invalid-modal-body {
+  padding: 12px 14px 14px;
+}
+
+.diagnostic-invalid-table {
+  border: 1px solid #dedede;
+  border-radius: 8px;
+  max-height: 48vh;
+  overflow: auto;
+}
+
 .diagnostic-file-list {
   border: 1px solid #dddddd;
   border-radius: 8px;

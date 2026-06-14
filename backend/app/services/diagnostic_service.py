@@ -1,13 +1,15 @@
 from __future__ import annotations
 
+import re
 import socket
 from datetime import datetime, timezone
 from stat import S_ISREG
+from typing import Callable
 
 import paramiko
 
 from app.config import Settings
-from app.models import DiagnosticFile, DiagnosticPrecheckResponse, DiagnosticRunResponse, Ticket
+from app.models import DiagnosticFile, DiagnosticInvalidFile, DiagnosticPrecheckResponse, DiagnosticRunResponse, Ticket
 from app.services.company_host import COMPANY_HOSTS
 
 
@@ -29,7 +31,7 @@ class DiagnosticService:
         host_name = precheck.host_name
 
         try:
-            files = self._list_remote_files(host_name=host_name, otp=otp.strip())
+            files, invalid_files = self._list_and_validate_remote_files(host_name=host_name, otp=otp.strip())
         except InvalidCredentialsError:
             return DiagnosticRunResponse(
                 success=False,
@@ -57,6 +59,19 @@ class DiagnosticService:
                 host_name=host_name,
                 remote_path=self.settings.diagnostic_remote_path,
             )
+        except UploadScriptReadError:
+            return DiagnosticRunResponse(
+                success=False,
+                error_code="UPLOADDATA_SCRIPT_READ_FAILED",
+                message="Unable to read or parse uploaddata.sh for allowed file formats.",
+                company=company,
+                host_name=host_name,
+                remote_path=self.settings.diagnostic_remote_path,
+            )
+
+        total_file_count = len(files)
+        invalid_file_count = len(invalid_files)
+        valid_file_count = total_file_count - invalid_file_count
 
         return DiagnosticRunResponse(
             success=True,
@@ -64,8 +79,12 @@ class DiagnosticService:
             company=company,
             host_name=host_name,
             remote_path=self.settings.diagnostic_remote_path,
-            file_count=len(files),
+            file_count=total_file_count,
             files=files,
+            total_file_count=total_file_count,
+            valid_file_count=valid_file_count,
+            invalid_file_count=invalid_file_count,
+            invalid_files=invalid_files,
         )
 
     def precheck_ticket(self, ticket: Ticket) -> DiagnosticPrecheckResponse:
@@ -103,7 +122,11 @@ class DiagnosticService:
             return None
         return first.split()[0].upper()
 
-    def _list_remote_files(self, host_name: str, otp: str) -> list[DiagnosticFile]:
+    def _list_and_validate_remote_files(
+        self,
+        host_name: str,
+        otp: str,
+    ) -> tuple[list[DiagnosticFile], list[DiagnosticInvalidFile]]:
         if not otp:
             raise InvalidOtpError("Missing OTP")
 
@@ -159,7 +182,11 @@ class DiagnosticService:
                 if S_ISREG(entry.st_mode)
             ]
             files.sort(key=lambda item: item.modified_at, reverse=True)
-            return files
+            invalid_files: list[DiagnosticInvalidFile] = []
+            if len(files) > self.settings.diagnostic_max_file_count:
+                allowed_extensions = self._extract_allowed_extensions_from_script(sftp)
+                invalid_files = self._find_invalid_files(files, allowed_extensions)
+            return files, invalid_files
         except (socket.gaierror, socket.timeout, TimeoutError, OSError, paramiko.SSHException) as exc:
             if isinstance(exc, (InvalidCredentialsError, InvalidOtpError)):
                 raise
@@ -184,6 +211,76 @@ class DiagnosticService:
                 responses.append(otp)
         return responses
 
+    def _extract_allowed_extensions_from_script(self, sftp: paramiko.SFTPClient) -> set[str]:
+        try:
+            with sftp.file(self.settings.diagnostic_uploaddata_script_path, "r") as script_file:
+                content = script_file.read()
+        except OSError as exc:
+            raise UploadScriptReadError(str(exc)) from exc
+
+        try:
+            script_text = content.decode("utf-8")
+        except UnicodeDecodeError:
+            script_text = content.decode("latin-1")
+
+        tokens = re.findall(r"\*\.[^\s`]+", script_text)
+        allowed_extensions: set[str] = set()
+        for token in tokens:
+            normalized = self._token_to_extension(token)
+            if normalized:
+                allowed_extensions.add(normalized)
+
+        if not allowed_extensions:
+            raise UploadScriptReadError("No allowed file formats were parsed from script.")
+        return allowed_extensions
+
+    def _token_to_extension(self, token: str) -> str | None:
+        suffix = token[2:] if token.startswith("*.") else token
+        if not suffix:
+            return None
+        idx = 0
+        chars: list[str] = []
+        while idx < len(suffix):
+            char = suffix[idx]
+            if char == "[":
+                closing = suffix.find("]", idx + 1)
+                if closing == -1:
+                    return None
+                group = suffix[idx + 1 : closing]
+                if not group:
+                    return None
+                chars.append(group[0].lower())
+                idx = closing + 1
+                continue
+            if char.isalnum():
+                chars.append(char.lower())
+            idx += 1
+        return "".join(chars) or None
+
+    def _find_invalid_files(
+        self,
+        files: list[DiagnosticFile],
+        allowed_extensions: set[str],
+    ) -> list[DiagnosticInvalidFile]:
+        rules: list[tuple[str, Callable[[str, set[str]], bool]]] = [
+            ("WHITESPACE_IN_FILENAME", self._has_whitespace),
+            ("UNSUPPORTED_FORMAT", self._has_unsupported_extension),
+        ]
+        invalid_files: list[DiagnosticInvalidFile] = []
+        for file in files:
+            for reason, rule in rules:
+                if rule(file.name, allowed_extensions):
+                    invalid_files.append(DiagnosticInvalidFile(name=file.name, reason=reason))
+                    break
+        return invalid_files
+
+    def _has_whitespace(self, file_name: str, _allowed_extensions: set[str]) -> bool:
+        return any(char.isspace() for char in file_name)
+
+    def _has_unsupported_extension(self, file_name: str, allowed_extensions: set[str]) -> bool:
+        extension = file_name.rsplit(".", maxsplit=1)[-1].lower() if "." in file_name else ""
+        return extension not in allowed_extensions
+
 
 class ServerConnectionError(Exception):
     pass
@@ -194,5 +291,9 @@ class InvalidCredentialsError(Exception):
 
 
 class InvalidOtpError(Exception):
+    pass
+
+
+class UploadScriptReadError(Exception):
     pass
 

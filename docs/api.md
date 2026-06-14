@@ -95,3 +95,56 @@ Returns last refresh time, total cached ticket count, health status, and refresh
 `POST /api/cache/refresh`
 
 Triggers an immediate Jira refresh. This is used by the dashboard refresh button.
+
+## Diagnostics Precheck
+
+`GET /api/diagnostics/precheck?ticket_id=WAPM-11165`
+
+Validates whether diagnostics can run for the selected ticket (for example, host mapping availability).
+
+Returns:
+
+| Field | Description |
+|-------|-------------|
+| `success` | `true` when precheck passes |
+| `error_code` | Machine-readable error code when precheck fails |
+| `message` | Human-readable precheck message |
+| `company` | Company code derived from the ticket |
+| `host_name` | Target host resolved for diagnostics |
+
+## Run Diagnostics
+
+`POST /api/diagnostics/run`
+
+Request body:
+
+```json
+{
+  "ticket_id": "WAPM-11165",
+  "otp": "123456"
+}
+```
+
+Runs the remote diagnostics workflow for the selected ticket using the provided OTP.
+
+Returns:
+
+| Field | Description |
+|-------|-------------|
+| `success` | `true` when diagnostic run succeeds |
+| `error_code` | Machine-readable error code when run fails |
+| `message` | Human-readable run result message |
+| `company` | Company code derived from the ticket |
+| `host_name` | Target host used for the run |
+| `remote_path` | Remote directory path checked on host |
+| `file_count` | Number of matching files found |
+| `files` | Array of diagnostic files (`name`, `modified_at`) |
+| `total_file_count` | Total files read from the diagnostic folder |
+| `valid_file_count` | Files considered valid by current rules |
+| `invalid_file_count` | Files considered invalid by current rules |
+| `invalid_files` | Array of invalid files (`name`, `reason`) |
+
+Current invalid-file reasons:
+
+- `UNSUPPORTED_FORMAT`
+- `WHITESPACE_IN_FILENAME`

@@ -37,6 +37,7 @@ function DiagnosticModal({ ticket, open, onClose }) {
   const [diagnosticResult, setDiagnosticResult] = useState(null);
   const [nameMenuAnchor, setNameMenuAnchor] = useState(null);
   const [dateMenuAnchor, setDateMenuAnchor] = useState(null);
+  const [invalidModalOpen, setInvalidModalOpen] = useState(false);
 
   const resetState = () => {
     setOtp("");
@@ -48,6 +49,7 @@ function DiagnosticModal({ ticket, open, onClose }) {
     setDiagnosticResult(null);
     setNameMenuAnchor(null);
     setDateMenuAnchor(null);
+    setInvalidModalOpen(false);
   };
 
   const precheckMutation = useMutation({
@@ -98,6 +100,7 @@ function DiagnosticModal({ ticket, open, onClose }) {
   const isOtpVisible = precheckResult?.success && !diagnosticResult?.success;
 
   const files = diagnosticResult?.success ? diagnosticResult.files ?? [] : [];
+  const invalidFiles = diagnosticResult?.success ? diagnosticResult.invalid_files ?? [] : [];
   const filteredAndSortedFiles = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
     const filtered = normalizedSearch
@@ -243,13 +246,28 @@ function DiagnosticModal({ ticket, open, onClose }) {
         {diagnosticResult?.success ? (
           <>
             <Box className="diagnostic-modal-table-toolbar">
-              <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-                <Typography variant="body2" fontWeight={700}>
-                  Files Found: {diagnosticResult.file_count}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  Times shown in UTC
-                </Typography>
+              <Stack spacing={0.6}>
+                <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                  <Typography variant="body2" fontWeight={700}>
+                    Files Found: {diagnosticResult.file_count}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Times shown in UTC
+                  </Typography>
+                </Stack>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Found {diagnosticResult.invalid_file_count ?? 0} invalid files
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    disabled={invalidFiles.length === 0}
+                    onClick={() => setInvalidModalOpen(true)}
+                  >
+                    Open Invalid Files
+                  </Button>
+                </Stack>
               </Stack>
               <TextField
                 size="small"
@@ -348,6 +366,55 @@ function DiagnosticModal({ ticket, open, onClose }) {
           Oldest to Newest
         </MenuItem>
       </Menu>
+
+      <Dialog
+        open={invalidModalOpen}
+        onClose={() => setInvalidModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ className: "diagnostic-invalid-modal-paper" }}
+      >
+        <Box className="diagnostic-modal-header">
+          <Typography variant="h6" fontWeight={800}>
+            Invalid Files - {ticket?.key}
+          </Typography>
+          <IconButton onClick={() => setInvalidModalOpen(false)} aria-label="Close invalid files modal">
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Box className="diagnostic-invalid-modal-body">
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            Invalid files are blocked by format and filename rules.
+          </Typography>
+          <Box className="diagnostic-invalid-table">
+            <Box className="diagnostic-modal-row diagnostic-modal-row--header">
+              <Typography variant="caption" fontWeight={700}>
+                File Name
+              </Typography>
+              <Typography variant="caption" fontWeight={700}>
+                Reason
+              </Typography>
+            </Box>
+            {invalidFiles.map((file) => (
+              <Box key={`${file.name}-${file.reason}`} className="diagnostic-modal-row">
+                <Typography variant="body2" className="diagnostic-modal-file-name">
+                  {file.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {file.reason === "WHITESPACE_IN_FILENAME" ? "Whitespace in filename" : "File format not supported"}
+                </Typography>
+              </Box>
+            ))}
+            {invalidFiles.length === 0 && (
+              <Box className="diagnostic-modal-empty-row">
+                <Typography variant="body2" color="text.secondary">
+                  No invalid files found.
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Box>
+      </Dialog>
     </Dialog>
   );
 }

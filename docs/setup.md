@@ -26,6 +26,8 @@ JIRA_PAT=replace-with-your-valid-pat
 JIRA_PROJECT_KEY=Workforce AppMonitoring
 JIRA_CLUSTER_FIELD=customfield_20014
 JIRA_CLIENT_ENV_FIELDS=customfield_20034,customfield_20032
+MAX_DIAGNOSTIC_FILE_COUNT=50
+DIAGNOSTIC_UPLOADDATA_SCRIPT_PATH=/mount/RWS4/batch_jobs/scripts/uploaddata.sh
 ```
 
 ## Frontend

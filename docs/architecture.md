@@ -23,6 +23,8 @@ backend/
     services/
       cache.py
       category_classifier.py
+      company_host.py
+      diagnostic_service.py
       jira_client.py
     config.py
     main.py
@@ -38,6 +40,7 @@ frontend/
     api/
       client.js
     components/
+      DiagnosticModal.jsx
       HierarchyTree.jsx
       MetricCard.jsx
       TicketDetails.jsx
@@ -84,6 +87,7 @@ Each ticket still retains `cluster_id` and `clientId Env` metadata from Jira cus
 - **Metrics row** — total tickets, status counts, issue category count, last refresh.
 - **Ticket list** — expandable tree grouped by issue category, or flat search results.
 - **Details drawer** — hidden by default; slides in from the right when a ticket is selected. The list panel shrinks with a CSS transition. Close via the X button or backdrop (on smaller screens).
+- **Diagnostic modal** — launched from ticket details; runs precheck and OTP-backed diagnostic execution against configured remote hosts.
 
 ## Future Extension Points
 
